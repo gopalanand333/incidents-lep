@@ -43,7 +43,6 @@ modules:
       memory: 256M
     properties:
       TENANT_HOST_PATTERN: "^(.*)-${default-uri}"
-      OWN_SAP_CLOUD_SERVICE: "[\"gaservice\"]"
     requires:
       - name: srv-api
         group: destinations
