@@ -118,6 +118,21 @@ modules:
       supported-platforms:
         []
 
+  - name: ga-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: ga-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: gaincidents
+          artifacts:
+            - incidents.zip
+          target-path: app/
+
 resources:
   - name: ga-db
     type: org.cloudfoundry.managed-service

@@ -19,7 +19,7 @@
         ],
         "apps": [
           {
-            "id": "ns.incidents"
+            "id": "ns.incidents1"
           }
         ]
       },
@@ -48,7 +48,7 @@
       "payload": {
         "viz": [
           {
-            "appId": "ns.incidents",
+            "appId": "ns.incidents1",
             "vizId": "intent1"
           }
         ]
@@ -131,7 +131,7 @@
                       {
                         "id": "widg-1111",
                         "viz": {
-                          "appId": "ns.incidents",
+                          "appId": "ns.incidents1",
                           "vizId": "intent1"
                         }
                       }
@@ -175,7 +175,7 @@
             "title": "{{sections.section1.title}}",
             "viz": [
               {
-                "appId": "ns.incidents",
+                "appId": "ns.incidents1",
                 "displayFormatHint": "default",
                 "vizId": "intent1"
               }

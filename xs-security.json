@@ -12,7 +12,6 @@
       "name": "uaa.user",
       "description": "UAA"
     },
-
     {
       "name": "$XSAPPNAME.Callback",
       "description": "Subscription via SaaS Registry",

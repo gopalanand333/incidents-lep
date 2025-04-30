@@ -1,0 +1,12 @@
+{
+    "name": "ga",
+    "version": "1.0.0",
+    "description": "A simple CAP project.",
+    "scripts": {
+        "start": "node node_modules/@sap/html5-app-deployer/index.js",
+        "postinstall": "cp ./gacd-handler.js ./node_modules/@sap/html5-app-deployer/gacd-handler.js"
+    },
+    "dependencies": {
+        "@sap/html5-app-deployer": "^7.0.0"
+    }
+}

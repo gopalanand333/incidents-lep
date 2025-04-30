@@ -1,7 +1,7 @@
 {
     "_version": "1.49.0",
     "sap.app": {
-        "id": "ns.incidents",
+        "id": "ns.incidents1",
         "type": "application",
         "i18n": "i18n/i18n.properties",
         "applicationVersion": {

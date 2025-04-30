@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=./values.schema.json
+
+global:
+  domain: eaafdf0.stage.kyma.ondemand.com
+  imagePullSecret:
+    name: docker-registry
+  image:
+    registry: gopalanand
+    tag: latest
+srv:
+  bindings:
+    service-manager:
+      serviceInstanceName: service-manager
+    auth:
+      serviceInstanceName: xsuaa
+  image:
+    repository: ga-srv
+  resources:
+    limits:
+      ephemeral-storage: 1G
+      memory: 500M
+    requests:
+      ephemeral-storage: 1G
+      cpu: 500m
+      memory: 500M
+  health:
+    liveness:
+      path: /health
+    readiness:
+      path: /health
+  expose:
+    enabled: false
+  networkSecurity:
+    allowNamespaceInternal: true
+approuter:
+  image:
+    repository: ga-approuter
+  env:
+    SAP_CLOUD_SERVICE: ga.service
+    TENANT_HOST_PATTERN: ^(.*)-{{ .Release.Name }}-approuter-{{ .Release.Namespace }}.{{ .Values.global.domain }} # change if expose.host is set
+  resources:
+    limits:
+      ephemeral-storage: 1G
+      memory: 500M
+    requests:
+      ephemeral-storage: 1G
+      cpu: 500m
+      memory: 500M
+  health:
+    liveness:
+      path: /
+    readiness:
+      path: /
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-approuter-configmap"
+  bindings:
+    html5-apps-repo-runtime:
+      serviceInstanceName: html5-apps-repo-runtime
+    auth:
+      serviceInstanceName: xsuaa
+    workzone:
+      serviceInstanceName: build-workzone-standard
+backendDestinations:
+  srv-api:
+    service: srv
+  mtx-api:
+    service: sidecar
+sidecar:
+  expose:
+    enabled: false
+  networkSecurity:
+    allowNamespaceInternal: true
+  bindings:
+    auth:
+      serviceInstanceName: xsuaa
+    saas-registry:
+      serviceInstanceName: saas-registry
+    service-manager:
+      serviceInstanceName: service-manager
+    workzone:
+      serviceInstanceName: build-workzone-standard
+    html5-apps-repo-runtime:
+      serviceInstanceName: html5-apps-repo-runtime
+    html5-apps-repo-host:
+      serviceInstanceName: html5-apps-repo-host
+  image:
+    repository: ga-sidecar
+  resources:
+    limits:
+      ephemeral-storage: 1G
+      memory: 500M
+    requests:
+      ephemeral-storage: 1G
+      cpu: 500m
+      memory: 500M
+  health:
+    liveness:
+      path: /health
+    readiness:
+      path: /health
+  env:
+    SUBSCRIPTION_URL: https://${tenant_subdomain}-{{ .Release.Name }}-approuter-{{ .Release.Namespace }}.{{ .Values.global.domain }}
+html5-apps-repo-host:
+  serviceOfferingName: html5-apps-repo-local-repo
+  servicePlanName: app-host
+html5-apps-deployer:
+  image:
+    repository: ga-html5-deployer
+  bindings:
+    xsuaa:
+      serviceInstanceName: xsuaa
+    html5-apps-repo:
+      serviceInstanceName: html5-apps-repo-host
+    workzone:
+      serviceInstanceName: build-workzone-standard
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1G
+    requests:
+      cpu: 200m
+      memory: 1G
+  envFrom:
+    - configMapRef:
+        name: "{{ .Release.Name }}-html5-apps-deployer-configmap"
+  env:
+    ASYNC_UPLOAD: "true"
+html5-apps-repo-runtime:
+  serviceOfferingName: html5-apps-repo
+  servicePlanName: app-runtime
+service-manager:
+  serviceOfferingName: service-manager
+  servicePlanName: container
+build-workzone-standard:
+  serviceOfferingName: build-workzone-standard
+  servicePlanName: local-entry-point
+  parameters: 
+    providerId: ga-123123123
+    exposureId: ga.service
+saas-registry:
+  serviceOfferingName: saas-registry
+  servicePlanName: application
+  parameters:
+    displayName: ga
+    description: A simple CAP project.
+    category: "CAP Application"
+    appUrls:
+      onSubscriptionAsync: true
+      onUnSubscriptionAsync: true
+      onUpdateDependenciesAsync: true
+      callbackTimeoutMillis: 300000
+      getDependencies: https://{{ .Release.Name }}-approuter-{{ .Release.Namespace }}.{{ .Values.global.domain }}/-/cds/saas-provisioning/dependencies
+      onSubscription: https://{{ .Release.Name }}-approuter-{{ .Release.Namespace }}.{{ .Values.global.domain }}/-/cds/saas-provisioning/tenant/{tenantId}
+    xsappname: ga2-{{ .Release.Namespace }}
+    appName: ga2-{{ .Release.Namespace }}
+xsuaa:
+  serviceOfferingName: xsuaa
+  servicePlanName: application
+  parameters:
+    tenant-mode: shared
+    oauth2-configuration:
+      redirect-uris:
+        - https://*.{{ tpl .Values.global.domain . }}/**
+    xsappname: ga2-{{ .Release.Namespace }}

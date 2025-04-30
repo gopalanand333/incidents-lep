@@ -1,0 +1,44 @@
+_schema-version: '1.0'
+repository: gopalanand
+tag: latest
+before-all:
+  - npx cds build --production
+  - mkdir -p ui-resources/resources
+  - cp -f workzone/cdm.json ui-resources/resources/cdm.json
+  - npm i --prefix app/incidents
+  - npm run build --prefix app/incidents
+  # zip filename should match the archiveName specified in ui5-deploy.yaml
+  - cp -f app/incidents/dist/incidents.zip ui-resources/resources/incidents.zip
+modules:
+  - name: ga-srv
+    build-parameters:
+      buildpack:
+        type: nodejs
+        builder: builder-jammy-base
+        path: gen/srv
+        env:
+          BP_NODE_RUN_SCRIPTS: ""
+  - name: ga-approuter
+    build-parameters:
+      buildpack:
+        type: nodejs
+        builder: builder-jammy-base
+        path: app/router
+        env:
+          BP_NODE_RUN_SCRIPTS: ""
+  - name: ga-html5-deployer
+    build-parameters:
+      buildpack:
+        type: nodejs
+        builder: builder-jammy-base
+        path: ui-resources
+        env:
+          BP_NODE_RUN_SCRIPTS: "postinstall"
+  - name: ga-sidecar
+    build-parameters:
+      buildpack:
+        type: nodejs
+        builder: builder-jammy-base
+        path: gen/mtx/sidecar
+        env:
+          BP_NODE_RUN_SCRIPTS: ""
